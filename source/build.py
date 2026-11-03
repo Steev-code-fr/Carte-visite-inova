@@ -168,7 +168,6 @@ BANDEAU_MOTIF = """<svg class="bandeau-motif" viewBox="0 0 440 190" preserveAspe
     <pattern id="bd-p" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r="1.1" fill="#FFFFFF" fill-opacity=".07"/></pattern>
   </defs>
   <rect width="440" height="190" fill="url(#bd-g)"/>
-  <rect width="440" height="190" fill="url(#bd-p)"/>
   <g fill="none" stroke="#E0287D">
     <circle cx="392" cy="34" r="46" stroke-width="10" stroke-opacity=".9"/>
     <circle cx="392" cy="34" r="84" stroke-width="2" stroke-opacity=".45"/>
@@ -284,7 +283,7 @@ a{color:inherit}
   background:var(--nuit-2);border:1px solid var(--filet)}
 .bandeau-motif,.bandeau-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;max-width:none}
 .bandeau-photo{opacity:.55;mix-blend-mode:luminosity}
-.logo{position:relative;width:min(180px,50%);height:auto;display:block}
+.logo{position:relative;width:min(200px,54%);height:auto;display:block}
 .identite{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;padding-bottom:6px;margin-top:-86px;position:relative}
 .photo{width:120px;height:120px;border-radius:50%;object-fit:cover;display:grid;place-items:center;margin-bottom:14px;
   background:var(--nuit-2);border:4px solid var(--nuit);box-shadow:0 0 0 2px var(--magenta),0 10px 30px -8px rgba(0,0,0,.6)}
@@ -327,7 +326,7 @@ h1{margin:0;font-weight:800;font-size:clamp(28px,8vw,34px);line-height:1.15;colo
 .actions-3{grid-template-columns:repeat(3,1fr)}
 .pied{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;font-size:13px;color:var(--lavande);margin-top:8px;padding-top:24px;border-top:1px solid var(--filet)}
 .pied p{margin:0}
-.logo-pied{width:min(190px,55%);height:auto;display:block;opacity:.92}
+.logo-pied{width:min(200px,58%);height:auto;display:block}
 @media (max-width:360px){.actions{grid-template-columns:repeat(2,1fr)}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 """
