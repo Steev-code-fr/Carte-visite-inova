@@ -96,10 +96,8 @@ def vcard(photo=True):
         if PHOTO_PROFIL.exists():
             im = photo_carree(300)
         else:
-            src = Image.open(HERE / "INOVA-symbole-rond-magenta.png").convert("RGBA")
-            # fond blanc derrière le rond (Samsung Contacts recadre en cercle)
-            im = Image.new("RGB", src.size, "white"); im.paste(src, mask=src.split()[3])
-            im = im.resize((240, 240), Image.LANCZOS)
+            # symbole I blanc + deux traits magenta sur fond Nuit (Samsung Contacts recadre en cercle)
+            im = Image.open(HERE / "INOVA-symbole-nuit-plein.png").convert("RGB").resize((300, 300), Image.LANCZOS)
         b64 = jpeg_b64(im, 85)
         first, rest = "PHOTO;ENCODING=b;TYPE=JPEG:" + b64[:45], b64[45:]
         lines.append(first)
@@ -125,7 +123,7 @@ qr_lien.save(buf, kind="svg", scale=6, border=2, dark=NUIT, light="#FFFFFF", xml
 qr_svg_inline = buf.getvalue().decode()
 
 # 3. Icônes écran d'accueil (Samsung / Android)
-sym = Image.open(HERE / "INOVA-symbole-rond-magenta.png").convert("RGBA")
+sym = Image.open(HERE / "INOVA-symbole-nuit-plein.png").convert("RGBA")
 for s in (192, 512):
     sym.resize((s, s), Image.LANCZOS).save(SITE / f"icone-{s}.png")
 sym.resize((180, 180), Image.LANCZOS).save(SITE / "apple-touch-icon.png")
