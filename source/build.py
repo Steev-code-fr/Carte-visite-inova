@@ -144,6 +144,7 @@ sym.resize((180, 180), Image.LANCZOS).save(SITE / "apple-touch-icon.png")
 # 4. Page HTML
 logo_svg = (HERE / "INOVA-principal-negatif-transparent.svg").read_text(encoding="utf-8")
 logo_svg = logo_svg.replace("<svg ", '<svg class="logo" ', 1)
+logo_couleur = (HERE / "INOVA-horizontal-couleur.svg").read_text(encoding="utf-8").replace("<svg ", '<svg class="logo-verso" ', 1)
 h = html.escape
 logo_h = (HERE / "INOVA-horizontal-negatif-transparent.svg").read_text(encoding="utf-8").replace("<svg ", '<svg class="logo-pied" ', 1)
 linkedin_btn = (f'''<a class="btn" href="{html.escape(c['linkedin'])}" target="_blank" rel="noopener">
@@ -181,17 +182,36 @@ apercu = ('<p class="apercu" role="note">Aperçu : téléphone, LinkedIn et adre
 page_body = f"""
 <main class="carte">
   {apercu}
-  <header class="bandeau">
-    {BANDEAU_MOTIF}
-    {bandeau_fond}
-    {logo_svg}
-  </header>
-
-  <section class="identite">
-    {photo_html}
-    <h1>{h(c['prenom'])} {h(c['nom'])}</h1>
-    <p class="fonction">{h(c['fonction'])}</p>
-    <p class="role">{h(c['role'])}</p>
+  <section class="scene" id="scene" aria-label="Carte de visite de {h(c['prenom'])} {h(c['nom'])}">
+    <div class="entree">
+      <div class="carte3d" id="carte3d" tabindex="0" role="button" aria-pressed="false" aria-label="Retourner la carte de visite">
+        <div class="face recto">
+          {logo_svg}
+          <div class="recto-id">
+            <h1>{h(c['prenom'])} {h(c['nom'])}</h1>
+            <p class="fonction">{h(c['fonction'])}</p>
+            <p class="role">{h(c['role'])}</p>
+          </div>
+          <span class="filet" aria-hidden="true"></span>
+          <span class="reflet" aria-hidden="true"></span>
+        </div>
+        <div class="face verso">
+          <div class="verso-qr">{qr_svg_inline}</div>
+          <div class="verso-infos">
+            {logo_couleur}
+            <ul>
+              <li>{h(c['mobile'])}</li>
+              <li>{h(c['email'])}</li>
+              <li>{h(c['site'].replace('https://', '').replace('http://', ''))}</li>
+              <li>{h(a['rue'])}<br>{h(a['cp'])} {h(a['ville'])}</li>
+            </ul>
+          </div>
+          <span class="reflet" aria-hidden="true"></span>
+        </div>
+      </div>
+    </div>
+    <div class="ombre" aria-hidden="true"></div>
+    <p class="astuce">Touchez la carte pour la retourner</p>
   </section>
 
   <nav class="actions{' actions-3' if not c['linkedin'] else ''}" aria-label="Contacter {h(c['prenom'])}">
@@ -228,11 +248,6 @@ page_body = f"""
     </ul>
   </section>
 
-  <section class="qr" aria-label="QR code de la carte">
-    <div class="qr-code">{qr_svg_inline}</div>
-    <p>Scannez avec l'appareil photo pour ouvrir cette carte et ajouter {h(c['prenom'])} à vos contacts.</p>
-  </section>
-
   <button class="partager" type="button" id="partager">
     <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>
     <span id="partager-txt">Partager cette carte</span>
@@ -244,6 +259,54 @@ page_body = f"""
   </footer>
 </main>
 <script>
+(function () {{
+  var scene = document.getElementById('scene'), carte = document.getElementById('carte3d');
+  var calme = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var rx = 0, ry = 0, flip = 0, start = null, bouge = false, gyro = false;
+  function rendre() {{
+    carte.style.setProperty('--rx', rx.toFixed(2) + 'deg');
+    carte.style.setProperty('--ry', (ry + flip).toFixed(2) + 'deg');
+    carte.style.setProperty('--mx', (25 + ry * 3).toFixed(1) + '%');
+    carte.style.setProperty('--my', (15 - rx * 3).toFixed(1) + '%');
+    scene.style.setProperty('--ox', (-ry * 0.8).toFixed(1) + 'px');
+  }}
+  function retourner() {{
+    flip = flip ? 0 : 180; carte.setAttribute('aria-pressed', flip ? 'true' : 'false');
+    carte.classList.add('anime'); rendre();
+  }}
+  carte.addEventListener('keydown', function (e) {{ if (e.key === 'Enter' || e.key === ' ') {{ e.preventDefault(); retourner(); }} }});
+  scene.addEventListener('pointerdown', function (e) {{ start = [e.clientX, e.clientY]; bouge = false; }});
+  scene.addEventListener('pointermove', function (e) {{
+    if (calme || gyro) return;
+    var r = carte.getBoundingClientRect();
+    var x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+    if (start && Math.hypot(e.clientX - start[0], e.clientY - start[1]) > 8) bouge = true;
+    if (e.pointerType === 'mouse' || start) {{
+      carte.classList.remove('anime');
+      ry = Math.max(-18, Math.min(18, x * 30)); rx = Math.max(-14, Math.min(14, -y * 24)); rendre();
+    }}
+  }});
+  function relacher() {{ start = null; if (!gyro) {{ carte.classList.add('anime'); rx = 0; ry = 0; rendre(); }} }}
+  scene.addEventListener('pointerleave', relacher);
+  scene.addEventListener('pointercancel', relacher);
+  carte.addEventListener('click', function () {{ if (!bouge) retourner(); bouge = false; relacher(); }});
+  function orientation(e) {{
+    if (e.gamma == null) return;
+    gyro = true; carte.classList.remove('anime');
+    ry = Math.max(-18, Math.min(18, e.gamma * 0.6));
+    rx = Math.max(-14, Math.min(14, -(e.beta - 45) * 0.4));
+    rendre();
+  }}
+  if (!calme && window.DeviceOrientationEvent) {{
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {{
+      carte.addEventListener('click', function demande() {{
+        DeviceOrientationEvent.requestPermission().then(function (r) {{ if (r === 'granted') addEventListener('deviceorientation', orientation); }}).catch(function () {{}});
+        carte.removeEventListener('click', demande);
+      }});
+    }} else {{ addEventListener('deviceorientation', orientation); }}
+  }}
+  rendre();
+}})();
 (function () {{
   var b = document.getElementById('partager'), t = document.getElementById('partager-txt');
   var url = {json.dumps(c['url_carte'])};
@@ -279,16 +342,33 @@ body{margin:0;background:var(--nuit);color:var(--brume);font:400 16px/1.5 var(--
 a{color:inherit}
 .carte{max-width:440px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
 .apercu{margin:0;padding:8px 12px;border:1px dashed var(--magenta);border-radius:8px;color:var(--magenta-clair);font-size:13px;text-align:center}
-.bandeau{position:relative;height:190px;border-radius:20px;overflow:hidden;display:flex;align-items:flex-start;padding:26px 24px;
-  background:var(--nuit-2);border:1px solid var(--filet)}
-.bandeau-motif,.bandeau-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;max-width:none}
-.bandeau-photo{opacity:.55;mix-blend-mode:luminosity}
-.logo{position:relative;width:min(200px,54%);height:auto;display:block}
-.identite{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;padding-bottom:6px;margin-top:-86px;position:relative}
-.photo{width:120px;height:120px;border-radius:50%;object-fit:cover;display:grid;place-items:center;margin-bottom:14px;
-  background:var(--nuit-2);border:4px solid var(--nuit);box-shadow:0 0 0 2px var(--magenta),0 10px 30px -8px rgba(0,0,0,.6)}
-.photo-symbole{background:var(--magenta);overflow:hidden}
-.photo-symbole svg{width:100%;height:100%;display:block}
+.scene{position:relative;perspective:1100px;padding-top:8px;touch-action:pan-y;-webkit-user-select:none;user-select:none}
+.entree{animation:entree 1.3s cubic-bezier(.2,.75,.25,1) both}
+@keyframes entree{from{transform:translateY(24px) rotateX(18deg) rotateY(-200deg) scale(.86);opacity:0}35%{opacity:1}to{transform:none;opacity:1}}
+.carte3d{--rx:0deg;--ry:0deg;--mx:25%;--my:15%;position:relative;width:100%;aspect-ratio:85/55;transform-style:preserve-3d;
+  transform:rotateX(var(--rx)) rotateY(var(--ry));cursor:pointer;border-radius:18px;outline-offset:6px}
+.carte3d.anime{transition:transform .7s cubic-bezier(.2,.75,.25,1)}
+.face{position:absolute;inset:0;border-radius:18px;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 26px 50px -22px rgba(0,0,0,.85)}
+.recto{background:var(--nuit);border:1px solid rgba(224,40,125,.35);display:flex;flex-direction:column;justify-content:space-between;padding:7% 7.5% 8%}
+.recto .logo{width:44%;height:auto;display:block}
+.recto-id{display:flex;flex-direction:column;gap:2px}
+.recto h1{font-size:clamp(20px,6.2vw,27px)}
+.recto .fonction{font-size:clamp(8.5px,2.5vw,11px);margin-top:2px}
+.recto .role{font-size:clamp(11px,3.4vw,14px)}
+.filet{position:absolute;right:7.5%;top:8%;width:16%;height:4px;background:var(--magenta);border-radius:2px}
+.verso{transform:rotateY(180deg);background:var(--brume);color:var(--nuit);display:grid;grid-template-columns:40% 1fr;gap:6%;align-items:center;padding:6.5% 7%}
+.verso-qr{background:#fff;border-radius:10px;padding:4%;line-height:0;box-shadow:0 0 0 1px #E7E1EE}
+.verso-qr svg{width:100%;height:auto}
+.verso-infos{min-width:0;display:flex;flex-direction:column;gap:8px}
+.logo-verso{width:86%;height:auto;display:block}
+.verso ul{list-style:none;margin:0;padding:0;display:grid;gap:3px;font-size:clamp(9px,2.7vw,12px);font-weight:600;line-height:1.3;overflow-wrap:anywhere}
+.verso li:first-child{font-weight:800}
+.reflet{position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background:radial-gradient(circle at var(--mx) var(--my),rgba(255,255,255,.09),rgba(255,255,255,0) 60%);mix-blend-mode:screen}
+.verso .reflet{mix-blend-mode:soft-light}
+.ombre{--ox:0px;height:18px;margin:10px 10% 0;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.55),transparent);transform:translateX(var(--ox));filter:blur(2px)}
+.astuce{margin:6px 0 0;text-align:center;font-size:12.5px;color:var(--lavande)}
 h1{margin:0;font-weight:800;font-size:clamp(28px,8vw,34px);line-height:1.15;color:var(--blanc);text-wrap:balance;letter-spacing:-.01em}
 .fonction{margin:4px 0 0;font:400 12.5px/1.6 var(--f-titre);letter-spacing:.16em;text-transform:uppercase;color:var(--magenta-clair)}
 .role{margin:0;display:flex;align-items:center;gap:10px;font-weight:600;color:var(--lavande);font-size:15px}
@@ -328,7 +408,7 @@ h1{margin:0;font-weight:800;font-size:clamp(28px,8vw,34px);line-height:1.15;colo
 .pied p{margin:0}
 .logo-pied{width:min(200px,58%);height:auto;display:block}
 @media (max-width:360px){.actions{grid-template-columns:repeat(2,1fr)}}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}.entree{animation:none}}
 """
 
 fonts = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=Michroma&display=swap">'
