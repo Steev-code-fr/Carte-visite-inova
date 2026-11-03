@@ -179,100 +179,129 @@ BANDEAU_MOTIF = """<svg class="bandeau-motif" viewBox="0 0 440 190" preserveAspe
 </svg>"""
 apercu = ('<p class="apercu" role="note">Aperçu : téléphone, LinkedIn et adresse sont encore fictifs.</p>' if APERCU else "")
 
+ICO = {
+    "tel": '<path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2"/>',
+    "mail": '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+    "sms": '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.4A8 8 0 1 1 21 12Z"/>',
+    "web": '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/>',
+    "pin": '<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/>',
+    "in": '<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 10v7M8 7v.01M12 17v-4a2 2 0 0 1 4 0v4M12 10v7"/>',
+    "add": '<circle cx="10" cy="8" r="4"/><path d="M3 20a7 7 0 0 1 14 0M19 8v6M16 11h6"/>',
+    "share": '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/>',
+    "flip": '<path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3"/><path d="M18 3v4h-4M6 21v-4h4"/>',
+    "feu": '<path d="M12 3c1 4 6 5.5 6 11a6 6 0 0 1-12 0c0-3.5 2.5-4.5 2.5-8 2 1.2 3.5 3 3.5 5"/>',
+    "cam": '<path d="M3 7h11l5-2v9l-5-2H3z"/><path d="M8 12v5M5 19h6"/>',
+    "badge": '<rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="10" r="2.5"/><path d="M8.5 17a3.5 3.5 0 0 1 7 0"/>',
+    "bouclier": '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+    "interphone": '<rect x="6" y="3" width="12" height="18" rx="2"/><circle cx="12" cy="8.5" r="2"/><path d="M9.5 14h5M9.5 17h5"/>',
+}
+def ico(n):
+    return f'<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">{ICO[n]}</svg>'
+
+METIERS = [("feu", "Sécurité incendie"), ("cam", "Vidéosurveillance"), ("badge", "Contrôle d'accès"),
+           ("bouclier", "Anti-intrusion"), ("interphone", "Interphonie")]
+site_txt = c['site'].replace('https://', '').replace('http://', '')
+metiers_recto = "".join(f'<span title="{h(m)}">{ico(i)}</span>' for i, m in METIERS)
+metiers_html = "".join(f'<li>{ico(i)}<span>{h(m)}</span></li>' for i, m in METIERS)
+linkedin_li = (f'<li><a href="{h(c["linkedin"])}" target="_blank" rel="noopener">{ico("in")}<span><small>LinkedIn</small>Voir le profil</span></a></li>' if c["linkedin"] else "")
+fixe_li = (f'<li><a href="tel:{tel_uri(c["fixe"])}">{ico("tel")}<span><small>Bureau</small>{h(c["fixe"])}</span></a></li>' if c["fixe"] else "")
+
+HALO = """<svg class="halo" viewBox="0 0 600 600" aria-hidden="true">
+  <defs><radialGradient id="halo-g"><stop offset="0" stop-color="#E0287D" stop-opacity=".38"/><stop offset=".45" stop-color="#E0287D" stop-opacity=".10"/><stop offset="1" stop-color="#E0287D" stop-opacity="0"/></radialGradient></defs>
+  <circle cx="300" cy="300" r="300" fill="url(#halo-g)"/>
+  <g fill="none" stroke="#E0287D">
+    <circle class="h1" cx="300" cy="300" r="150" stroke-width="2" stroke-opacity=".55" stroke-dasharray="4 14"/>
+    <circle class="h2" cx="300" cy="300" r="205" stroke-width="1.5" stroke-opacity=".35" stroke-dasharray="120 40 8 40"/>
+    <circle class="h3" cx="300" cy="300" r="262" stroke-width="1" stroke-opacity=".22"/>
+    <circle class="h4" cx="300" cy="300" r="292" stroke-width="10" stroke-opacity=".10" stroke-dasharray="60 400"/>
+  </g>
+</svg>"""
+
 page_body = f"""
-<main class="carte">
+<div class="page">
   {apercu}
-  <section class="scene" id="scene" aria-label="Carte de visite de {h(c['prenom'])} {h(c['nom'])}">
+  <section class="hero" id="scene" aria-label="Carte de visite de {h(c['prenom'])} {h(c['nom'])}">
+    {HALO}
     <div class="entree">
       <div class="carte3d" id="carte3d" tabindex="0" role="button" aria-pressed="false" aria-label="Retourner la carte de visite">
+        <span class="tranche t1" aria-hidden="true"></span><span class="tranche t2" aria-hidden="true"></span><span class="tranche t3" aria-hidden="true"></span>
         <div class="face recto">
-          {logo_svg}
+          <div class="recto-haut">{logo_svg}</div>
           <div class="recto-id">
-            <h1>{h(c['prenom'])} {h(c['nom'])}</h1>
+            <h1>{h(c['prenom'])}<br>{h(c['nom'])}</h1>
             <p class="fonction">{h(c['fonction'])}</p>
             <p class="role">{h(c['role'])}</p>
           </div>
-          <span class="filet" aria-hidden="true"></span>
-          <span class="reflet" aria-hidden="true"></span>
+          <p class="recto-metiers" aria-label="Sécurité incendie, vidéosurveillance, contrôle d'accès, anti-intrusion, interphonie">{metiers_recto}</p>
+          <span class="angle" aria-hidden="true"></span>
+          <span class="reflet" aria-hidden="true"></span><span class="balayage" aria-hidden="true"></span>
         </div>
         <div class="face verso">
+          {logo_couleur}
           <div class="verso-qr">{qr_svg_inline}</div>
-          <div class="verso-infos">
-            {logo_couleur}
-            <ul>
-              <li>{h(c['mobile'])}</li>
-              <li>{h(c['email'])}</li>
-              <li>{h(c['site'].replace('https://', '').replace('http://', ''))}</li>
-              <li>{h(a['rue'])}<br>{h(a['cp'])} {h(a['ville'])}</li>
-            </ul>
-          </div>
-          <span class="reflet" aria-hidden="true"></span>
+          <p class="verso-scan">Scannez pour m'enregistrer</p>
+          <ul class="verso-infos">
+            <li>{h(c['mobile'])}</li>
+            <li>{h(c['email'])}</li>
+            <li>{h(site_txt)}</li>
+            <li>{h(a['rue'])}, {h(a['cp'])} {h(a['ville'])}</li>
+          </ul>
+          <span class="reflet" aria-hidden="true"></span><span class="balayage" aria-hidden="true"></span>
         </div>
       </div>
     </div>
     <div class="ombre" aria-hidden="true"></div>
-    <p class="astuce">Touchez la carte pour la retourner</p>
+    <p class="astuce">{ico("flip")}<span>Touchez la carte pour la retourner</span></p>
   </section>
 
-  <nav class="actions{' actions-3' if not c['linkedin'] else ''}" aria-label="Contacter {h(c['prenom'])}">
-    <a class="btn" href="tel:{tel_uri(c['mobile'])}">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2"/></svg>
-      Appeler</a>
-    <a class="btn" href="mailto:{h(c['email'])}">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
-      E-mail</a>
-    <a class="btn" href="sms:{tel_uri(c['mobile'])}">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.4A8 8 0 1 1 21 12Z"/></svg>
-      SMS</a>
-    {linkedin_btn}
-  </nav>
-
-  <a class="enregistrer" href="{vcf_name}" download="{vcf_name}">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="8" r="4"/><path d="M3 20a7 7 0 0 1 14 0M19 8v6M16 11h6"/></svg>
-    Enregistrer le contact
-  </a>
-
-  <dl class="coord">
-    <div><dt>Mobile</dt><dd><a href="tel:{tel_uri(c['mobile'])}">{h(c['mobile'])}</a></dd></div>
-    {f'<div><dt>Bureau</dt><dd><a href="tel:{tel_uri(c["fixe"])}">{h(c["fixe"])}</a></dd></div>' if c['fixe'] else ''}
-    <div><dt>E-mail</dt><dd><a href="mailto:{h(c['email'])}">{h(c['email'])}</a></dd></div>
-    <div><dt>Site</dt><dd><a href="{h(c['site'])}" target="_blank" rel="noopener">{h(c['site'].replace('https://', '').replace('http://', ''))}</a></dd></div>
-    <div><dt>Adresse</dt><dd><a href="{h(maps)}" target="_blank" rel="noopener">{h(adr_txt)}</a></dd></div>
-  </dl>
-
-  <section class="metiers" aria-label="Nos métiers">
-    <h2>Nos métiers</h2>
-    <ul>
-      <li>Sécurité incendie</li><li>Vidéosurveillance</li><li>Contrôle d'accès</li>
-      <li>Anti-intrusion</li><li>Interphonie</li>
+  <div class="contenu">
+    <ul class="coord">
+      <li><a href="tel:{tel_uri(c['mobile'])}">{ico("tel")}<span><small>Mobile</small>{h(c['mobile'])}</span></a></li>
+      {fixe_li}
+      <li><a href="mailto:{h(c['email'])}">{ico("mail")}<span><small>E-mail</small>{h(c['email'])}</span></a></li>
+      <li><a href="sms:{tel_uri(c['mobile'])}">{ico("sms")}<span><small>SMS</small>Envoyer un message</span></a></li>
+      <li><a href="{h(c['site'])}" target="_blank" rel="noopener">{ico("web")}<span><small>Site</small>{h(site_txt)}</span></a></li>
+      <li><a href="{h(maps)}" target="_blank" rel="noopener">{ico("pin")}<span><small>Adresse</small>{h(a['rue'])}<br>{h(a['cp'])} {h(a['ville'])}</span></a></li>
+      {linkedin_li}
     </ul>
-  </section>
 
-  <button class="partager" type="button" id="partager">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>
-    <span id="partager-txt">Partager cette carte</span>
-  </button>
+    <section class="metiers" aria-labelledby="t-metiers">
+      <h2 id="t-metiers"><span class="double" aria-hidden="true"></span>Nos métiers</h2>
+      <ul>{metiers_html}</ul>
+    </section>
 
-  <footer class="pied">
-    {logo_h}
-    <p>Un seul interlocuteur pour toute la sécurité du bâtiment.</p>
-  </footer>
-</main>
+    <button class="partager" type="button" id="partager">{ico("share")}<span id="partager-txt">Partager cette carte</span></button>
+
+    <footer class="pied">
+      {logo_h}
+      <p>Un seul interlocuteur pour toute la sécurité du bâtiment.</p>
+    </footer>
+  </div>
+</div>
+
+<nav class="barre" aria-label="Contacter {h(c['prenom'])}">
+  <a class="b-sec" href="tel:{tel_uri(c['mobile'])}">{ico("tel")}<span>Appeler</span></a>
+  <a class="b-sec" href="mailto:{h(c['email'])}">{ico("mail")}<span>E-mail</span></a>
+  <a class="b-pri" href="{vcf_name}" download="{vcf_name}">{ico("add")}<span>Enregistrer</span></a>
+</nav>
 <script>
 (function () {{
   var scene = document.getElementById('scene'), carte = document.getElementById('carte3d');
   var calme = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var rx = 0, ry = 0, flip = 0, start = null, bouge = false, gyro = false;
+  var rx = 0, ry = 0, flip = 0, start = null, bouge = false, gyro = false, main = false, repos = 0;
   function rendre() {{
     carte.style.setProperty('--rx', rx.toFixed(2) + 'deg');
     carte.style.setProperty('--ry', (ry + flip).toFixed(2) + 'deg');
-    carte.style.setProperty('--mx', (25 + ry * 3).toFixed(1) + '%');
-    carte.style.setProperty('--my', (15 - rx * 3).toFixed(1) + '%');
-    scene.style.setProperty('--ox', (-ry * 0.8).toFixed(1) + 'px');
+    carte.style.setProperty('--mx', (30 + ry * 3).toFixed(1) + '%');
+    carte.style.setProperty('--my', (20 - rx * 3).toFixed(1) + '%');
+    carte.style.setProperty('--bx', (50 + ry * 6).toFixed(1) + '%');
+    scene.style.setProperty('--ox', (-ry * 1.2).toFixed(1) + 'px');
+    scene.style.setProperty('--hx', (ry * -0.8).toFixed(1) + 'px');
+    scene.style.setProperty('--hy', (rx * 0.8).toFixed(1) + 'px');
   }}
   function retourner() {{
     flip = flip ? 0 : 180; carte.setAttribute('aria-pressed', flip ? 'true' : 'false');
-    carte.classList.add('anime'); rendre();
+    carte.classList.add('anime'); repos = performance.now() + 900; rendre();
   }}
   carte.addEventListener('keydown', function (e) {{ if (e.key === 'Enter' || e.key === ' ') {{ e.preventDefault(); retourner(); }} }});
   scene.addEventListener('pointerdown', function (e) {{ start = [e.clientX, e.clientY]; bouge = false; }});
@@ -282,19 +311,19 @@ page_body = f"""
     var x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
     if (start && Math.hypot(e.clientX - start[0], e.clientY - start[1]) > 8) bouge = true;
     if (e.pointerType === 'mouse' || start) {{
-      carte.classList.remove('anime');
-      ry = Math.max(-18, Math.min(18, x * 30)); rx = Math.max(-14, Math.min(14, -y * 24)); rendre();
+      main = true; carte.classList.remove('anime');
+      ry = Math.max(-22, Math.min(22, x * 40)); rx = Math.max(-16, Math.min(16, -y * 28)); rendre();
     }}
   }});
-  function relacher() {{ start = null; if (!gyro) {{ carte.classList.add('anime'); rx = 0; ry = 0; rendre(); }} }}
+  function relacher() {{ start = null; main = false; repos = performance.now() + 1200; if (!gyro) {{ carte.classList.add('anime'); rx = 0; ry = 0; rendre(); }} }}
   scene.addEventListener('pointerleave', relacher);
   scene.addEventListener('pointercancel', relacher);
-  carte.addEventListener('click', function () {{ if (!bouge) retourner(); bouge = false; relacher(); }});
+  carte.addEventListener('click', function () {{ if (!bouge) retourner(); bouge = false; start = null; }});
   function orientation(e) {{
-    if (e.gamma == null) return;
+    if (e.gamma == null || main) return;
     gyro = true; carte.classList.remove('anime');
-    ry = Math.max(-18, Math.min(18, e.gamma * 0.6));
-    rx = Math.max(-14, Math.min(14, -(e.beta - 45) * 0.4));
+    ry = Math.max(-22, Math.min(22, e.gamma * 0.7));
+    rx = Math.max(-16, Math.min(16, -(e.beta - 50) * 0.45));
     rendre();
   }}
   if (!calme && window.DeviceOrientationEvent) {{
@@ -305,6 +334,17 @@ page_body = f"""
       }});
     }} else {{ addEventListener('deviceorientation', orientation); }}
   }}
+  /* balancement doux quand personne ne touche la carte */
+  var t0 = performance.now() + 1400;
+  function flotter(t) {{
+    if (!calme && !gyro && !main && t > t0 && t > repos) {{
+      var s = (t - t0) / 1000;
+      carte.classList.remove('anime');
+      ry = Math.sin(s * 0.9) * 9; rx = Math.sin(s * 0.6 + 1) * 5; rendre();
+    }}
+    requestAnimationFrame(flotter);
+  }}
+  requestAnimationFrame(flotter);
   rendre();
 }})();
 (function () {{
@@ -326,89 +366,123 @@ page_body = f"""
 
 css = """
 :root{
-  /* Carte de visite : un seul écran sombre Nuit, accents magenta (charte INOVA v1.0) */
-  --nuit:#1B1030; --nuit-2:#251740; --nuit-3:#33224F; --magenta:#E0287D; --magenta-clair:#F05A9C;
-  --blanc:#FFFFFF; --brume:#F7F4FA; --lavande:#B9AECB; --filet:rgba(231,225,238,.14);
+  /* Une carte de visite qui flotte dans le halo du « O » : Nuit en aplat, magenta en accent (charte INOVA v1.0) */
+  --nuit:#1B1030; --nuit-2:#251740; --nuit-3:#33224F; --magenta:#E0287D; --magenta-clair:#F05A9C; --magenta-fonce:#C41E68;
+  --blanc:#FFFFFF; --brume:#F7F4FA; --lavande:#B9AECB; --prune:#6E6578; --filet:rgba(231,225,238,.14);
   --f-titre:"Michroma","Eurostile","Arial Black",sans-serif;
   --f-texte:"Manrope","Segoe UI",Roboto,Arial,sans-serif;
+  --barre-h:76px;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
-html{background:var(--nuit)}
-body{margin:0;background:var(--nuit);color:var(--brume);font:400 16px/1.5 var(--f-texte);
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
-  padding-block:max(20px,env(safe-area-inset-top,0px)) max(28px,env(safe-area-inset-bottom,0px));
-  -webkit-text-size-adjust:100%}
+html{background:var(--nuit);overflow-x:hidden}
+body{margin:0;background:var(--nuit);color:var(--brume);font:400 16px/1.5 var(--f-texte);overflow-x:hidden;-webkit-text-size-adjust:100%;
+  -webkit-tap-highlight-color:transparent}
 a{color:inherit}
-.carte{max-width:440px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
-.apercu{margin:0;padding:8px 12px;border:1px dashed var(--magenta);border-radius:8px;color:var(--magenta-clair);font-size:13px;text-align:center}
-.scene{position:relative;perspective:1100px;padding-top:8px;touch-action:pan-y;-webkit-user-select:none;user-select:none}
-.entree{animation:entree 1.3s cubic-bezier(.2,.75,.25,1) both}
-@keyframes entree{from{transform:translateY(24px) rotateX(18deg) rotateY(-200deg) scale(.86);opacity:0}35%{opacity:1}to{transform:none;opacity:1}}
-.carte3d{--rx:0deg;--ry:0deg;--mx:25%;--my:15%;position:relative;width:100%;aspect-ratio:85/55;transform-style:preserve-3d;
-  transform:rotateX(var(--rx)) rotateY(var(--ry));cursor:pointer;border-radius:18px;outline-offset:6px}
-.carte3d.anime{transition:transform .7s cubic-bezier(.2,.75,.25,1)}
-.face{position:absolute;inset:0;border-radius:18px;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden;
-  box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 26px 50px -22px rgba(0,0,0,.85)}
-.recto{background:var(--nuit);border:1px solid rgba(224,40,125,.35);display:flex;flex-direction:column;justify-content:space-between;padding:7% 7.5% 8%}
-.recto .logo{width:44%;height:auto;display:block}
-.recto-id{display:flex;flex-direction:column;gap:2px}
-.recto h1{font-size:clamp(20px,6.2vw,27px)}
-.recto .fonction{font-size:clamp(8.5px,2.5vw,11px);margin-top:2px}
-.recto .role{font-size:clamp(11px,3.4vw,14px)}
-.filet{position:absolute;right:7.5%;top:8%;width:16%;height:4px;background:var(--magenta);border-radius:2px}
-.verso{transform:rotateY(180deg);background:var(--brume);color:var(--nuit);display:grid;grid-template-columns:40% 1fr;gap:6%;align-items:center;padding:6.5% 7%}
-.verso-qr{background:#fff;border-radius:10px;padding:4%;line-height:0;box-shadow:0 0 0 1px #E7E1EE}
-.verso-qr svg{width:100%;height:auto}
-.verso-infos{min-width:0;display:flex;flex-direction:column;gap:8px}
-.logo-verso{width:86%;height:auto;display:block}
-.verso ul{list-style:none;margin:0;padding:0;display:grid;gap:3px;font-size:clamp(9px,2.7vw,12px);font-weight:600;line-height:1.3;overflow-wrap:anywhere}
-.verso li:first-child{font-weight:800}
-.reflet{position:absolute;inset:0;pointer-events:none;border-radius:inherit;
-  background:radial-gradient(circle at var(--mx) var(--my),rgba(255,255,255,.09),rgba(255,255,255,0) 60%);mix-blend-mode:screen}
-.verso .reflet{mix-blend-mode:soft-light}
-.ombre{--ox:0px;height:18px;margin:10px 10% 0;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.55),transparent);transform:translateX(var(--ox));filter:blur(2px)}
-.astuce{margin:6px 0 0;text-align:center;font-size:12.5px;color:var(--lavande)}
-h1{margin:0;font-weight:800;font-size:clamp(28px,8vw,34px);line-height:1.15;color:var(--blanc);text-wrap:balance;letter-spacing:-.01em}
-.fonction{margin:4px 0 0;font:400 12.5px/1.6 var(--f-titre);letter-spacing:.16em;text-transform:uppercase;color:var(--magenta-clair)}
-.role{margin:0;display:flex;align-items:center;gap:10px;font-weight:600;color:var(--lavande);font-size:15px}
-.barres{display:inline-block;width:14px;height:14px;position:relative;flex:none}
-.barres::before,.barres::after{content:"";position:absolute;left:0;right:0;height:3px;background:var(--magenta)}
-.barres::before{top:0}.barres::after{bottom:0}
-.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 4px 12px;border-radius:14px;
-  background:var(--nuit-2);border:1px solid var(--filet);text-decoration:none;font-weight:600;font-size:13px;color:var(--brume);
-  transition:background .15s,border-color .15s}
-.btn svg,.enregistrer svg,.partager svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.btn svg{color:var(--magenta-clair)}
-.btn:hover,.btn:focus-visible{background:var(--nuit-3);border-color:var(--magenta)}
-.enregistrer{display:flex;align-items:center;justify-content:center;gap:10px;padding:16px;border-radius:14px;
-  background:var(--magenta);color:var(--blanc);text-decoration:none;font-weight:800;font-size:17px;letter-spacing:.01em;
-  box-shadow:0 8px 24px -10px rgba(224,40,125,.7);transition:filter .15s}
-.enregistrer:hover,.enregistrer:focus-visible{filter:brightness(1.08)}
+.ico{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 :focus-visible{outline:2px solid var(--magenta-clair);outline-offset:3px}
-.coord{margin:0;display:flex;flex-direction:column;border-top:1px solid var(--filet)}
-.coord>div{display:grid;grid-template-columns:78px 1fr;gap:12px;padding:12px 2px;border-bottom:1px solid var(--filet);align-items:baseline}
-.coord dt{font:400 10px/1.4 var(--f-titre);letter-spacing:.14em;text-transform:uppercase;color:var(--lavande)}
-.coord dd{margin:0;min-width:0;overflow-wrap:anywhere;font-weight:600;color:var(--blanc)}
-.coord dd a{text-decoration:none}
-.coord dd a:hover{text-decoration:underline;text-decoration-color:var(--magenta)}
-.metiers h2{margin:0 0 10px;font:400 11px/1.4 var(--f-titre);letter-spacing:.18em;text-transform:uppercase;color:var(--lavande)}
-.metiers ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
-.metiers li{padding:6px 12px;border-radius:999px;border:1px solid var(--filet);font-size:13.5px;font-weight:600;color:var(--brume)}
-.qr{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:14px;border-radius:16px;background:var(--nuit-2);border:1px solid var(--filet)}
-.qr-code{flex:none;width:min(220px,70%);background:#fff;border-radius:10px;padding:6px;line-height:0}
-.qr-code svg{width:100%;height:auto}
-.qr p{margin:0;font-size:14px;color:var(--lavande);min-width:0}
-.partager{display:flex;align-items:center;justify-content:center;gap:10px;padding:14px;border-radius:14px;width:100%;
-  background:transparent;border:1px solid var(--magenta);color:var(--blanc);font:600 15px/1 var(--f-texte);cursor:pointer}
+.page{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:max(12px,env(safe-area-inset-top,0px)) calc(var(--barre-h) + 28px + env(safe-area-inset-bottom,0px))}
+.apercu{margin:0 0 8px;padding:8px 12px;border:1px dashed var(--magenta);border-radius:8px;color:var(--magenta-clair);font-size:13px;text-align:center}
+
+/* --- Héros : la carte occupe l'écran --- */
+.hero{--ox:0px;--hx:0px;--hy:0px;position:relative;perspective:1300px;min-height:calc(100svh - var(--barre-h) - 24px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding-block:12px 8px;touch-action:pan-y;-webkit-user-select:none;user-select:none;overflow-x:clip}
+.halo{position:absolute;left:50%;top:46%;width:min(170vw,980px);height:auto;max-width:none;transform:translate(calc(-50% + var(--hx)),calc(-50% + var(--hy)));pointer-events:none;
+  animation:halo-in 1.6s ease-out both}
+.halo .h1{transform-origin:300px 300px;animation:tourne 38s linear infinite}
+.halo .h2{transform-origin:300px 300px;animation:tourne 60s linear infinite reverse}
+.halo .h4{transform-origin:300px 300px;animation:tourne 16s linear infinite}
+@keyframes tourne{to{transform:rotate(360deg)}}
+@keyframes halo-in{from{opacity:0;transform:translate(calc(-50% + var(--hx)),calc(-50% + var(--hy))) scale(.6)}to{opacity:1}}
+.entree{position:relative;width:min(84vw,380px,calc((100svh - var(--barre-h) - 150px) * 55 / 85));animation:entree 1.4s cubic-bezier(.2,.75,.25,1) both}
+@keyframes entree{from{transform:translateY(40px) rotateX(24deg) rotateY(-220deg) scale(.8);opacity:0}30%{opacity:1}to{transform:none;opacity:1}}
+.carte3d{--rx:0deg;--ry:0deg;--mx:30%;--my:20%;--bx:50%;position:relative;width:100%;aspect-ratio:55/85;transform-style:preserve-3d;
+  transform:rotateX(var(--rx)) rotateY(var(--ry));cursor:pointer;border-radius:22px;outline-offset:8px}
+.carte3d.anime{transition:transform .8s cubic-bezier(.2,.75,.25,1)}
+.tranche{position:absolute;inset:0;border-radius:22px;background:var(--magenta-fonce)}
+.t1{transform:translateZ(-1.5px)}.t2{transform:translateZ(0)}.t3{transform:translateZ(1.5px)}
+.face{position:absolute;inset:0;border-radius:22px;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  box-shadow:0 40px 70px -30px rgba(0,0,0,.9)}
+.recto{transform:translateZ(3px);background:var(--nuit);border:1px solid rgba(224,40,125,.45);display:flex;flex-direction:column;padding:10% 9% 9%}
+.verso{transform:rotateY(180deg) translateZ(3px);background:var(--brume);color:var(--nuit);display:flex;flex-direction:column;align-items:center;padding:9% 9% 8%;text-align:center}
+.recto-haut{display:flex;justify-content:space-between;align-items:flex-start}
+.recto .logo{width:62%;height:auto;display:block}
+.double{display:inline-block;width:28px;height:16px;flex:none;position:relative}
+.double::before,.double::after{content:"";position:absolute;left:0;right:0;height:4px;background:var(--magenta);border-radius:1px}
+.double::before{top:0}.double::after{bottom:0}
+.recto-id{margin-top:auto;display:flex;flex-direction:column;gap:4px}
+.recto h1{margin:0;font-weight:800;font-size:clamp(30px,10.5vw,44px);line-height:1.02;letter-spacing:-.02em;color:var(--blanc)}
+.recto .fonction{margin:10px 0 0;font:400 clamp(9px,2.7vw,11.5px)/1.5 var(--f-titre);letter-spacing:.16em;text-transform:uppercase;color:var(--magenta-clair)}
+.recto .role{margin:0;font-weight:600;font-size:clamp(13px,3.8vw,16px);color:var(--lavande)}
+.recto-metiers{margin:9% 0 0;padding-top:7%;border-top:1px solid var(--filet);display:flex;gap:7%;color:var(--lavande)}
+.recto-metiers .ico{width:clamp(18px,5.6vw,24px);height:clamp(18px,5.6vw,24px);stroke-width:1.6}
+.angle{position:absolute;right:-16%;bottom:-11%;width:48%;aspect-ratio:1;border-radius:50%;border:12px solid var(--magenta);pointer-events:none}
+.recto-id,.recto-metiers{position:relative;z-index:1}
+.recto-metiers{margin-right:30%}
+.logo-verso{width:72%;height:auto;display:block}
+.verso-qr{margin-top:9%;width:74%;background:#fff;border-radius:14px;padding:4%;line-height:0;box-shadow:0 0 0 1px #E7E1EE,0 12px 24px -16px rgba(27,16,48,.5)}
+.verso-qr svg{width:100%;height:auto}
+.verso-scan{margin:5% 0 0;font:400 clamp(7.5px,2.2vw,9.5px)/1.4 var(--f-titre);letter-spacing:.14em;text-transform:uppercase;color:var(--magenta-fonce)}
+.verso-infos{list-style:none;margin:auto 0 0;padding:0;display:grid;gap:2px;font-size:clamp(10px,3vw,13px);font-weight:600;line-height:1.35;overflow-wrap:anywhere}
+.verso-infos li:first-child{font-weight:800;font-size:1.15em}
+.reflet{position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background:radial-gradient(circle at var(--mx) var(--my),rgba(255,255,255,.13),rgba(255,255,255,0) 55%)}
+.balayage{position:absolute;inset:-20%;pointer-events:none;
+  background:linear-gradient(105deg,transparent 42%,rgba(255,255,255,.10) 50%,transparent 58%);background-size:250% 100%;background-position:var(--bx) 0;
+  mix-blend-mode:screen}
+.verso .balayage{mix-blend-mode:normal;opacity:.6}
+.ombre{width:min(70vw,320px);height:22px;margin-top:22px;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.6),transparent);
+  transform:translateX(var(--ox));filter:blur(3px);animation:fondu .8s .6s both}
+.astuce{display:flex;align-items:center;gap:8px;margin:12px 0 0;font-size:13px;font-weight:600;color:var(--lavande);animation:fondu .8s 1.2s both}
+.astuce .ico{width:18px;height:18px;color:var(--magenta-clair);animation:tourne 3.5s ease-in-out infinite}
+@keyframes fondu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* --- Contenu --- */
+.contenu{display:flex;flex-direction:column;gap:26px;max-width:520px;margin:0 auto;width:100%}
+.coord{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.coord li{min-width:0}
+.coord li:nth-child(2),.coord li:nth-child(5){grid-column:1/-1}
+.coord a{height:100%;display:flex;align-items:flex-start;gap:12px;padding:14px;border-radius:16px;background:var(--nuit-2);border:1px solid var(--filet);
+  text-decoration:none;font-weight:700;font-size:14.5px;line-height:1.35;color:var(--blanc);transition:border-color .2s,background .2s,transform .2s}
+.coord a:hover,.coord a:focus-visible{border-color:var(--magenta);background:var(--nuit-3);transform:translateY(-2px)}
+.coord .ico{color:var(--magenta-clair);margin-top:2px}
+.coord span{min-width:0;overflow-wrap:anywhere;display:flex;flex-direction:column}
+.coord small{font:400 9.5px/1.6 var(--f-titre);letter-spacing:.14em;text-transform:uppercase;color:var(--lavande)}
+.metiers h2{display:flex;align-items:center;gap:12px;margin:0 0 14px;font:400 12px/1.4 var(--f-titre);letter-spacing:.2em;text-transform:uppercase;color:var(--blanc)}
+.metiers h2 .double{width:20px;height:12px}
+.metiers h2 .double::before,.metiers h2 .double::after{height:3px}
+.metiers ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:10px}
+.metiers li{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 8px;border-radius:16px;border:1px solid var(--filet);text-align:center;font-size:12.5px;font-weight:700;line-height:1.25}
+.metiers li .ico{width:28px;height:28px;color:var(--magenta-clair)}
+.partager{display:flex;align-items:center;justify-content:center;gap:10px;padding:15px;border-radius:16px;width:100%;
+  background:transparent;border:1px solid var(--magenta);color:var(--blanc);font:700 15px/1 var(--f-texte);cursor:pointer;transition:background .2s}
 .partager:hover{background:var(--nuit-2)}
-.actions-3{grid-template-columns:repeat(3,1fr)}
-.pied{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;font-size:13px;color:var(--lavande);margin-top:8px;padding-top:24px;border-top:1px solid var(--filet)}
+.pied{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;font-size:13px;color:var(--lavande);padding-top:24px;border-top:1px solid var(--filet)}
 .pied p{margin:0}
-.logo-pied{width:min(200px,58%);height:auto;display:block}
-@media (max-width:360px){.actions{grid-template-columns:repeat(2,1fr)}}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}.entree{animation:none}}
+.logo-pied{width:min(210px,60%);height:auto;display:block}
+
+/* --- Barre d'actions fixe --- */
+.barre{position:fixed;left:0;right:0;bottom:0;z-index:20;display:grid;grid-template-columns:1fr 1fr 1.6fr;gap:8px;
+  padding:10px max(12px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px));
+  background:rgba(27,16,48,.86);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--filet);animation:monte .7s 1s both}
+@keyframes monte{from{transform:translateY(100%)}to{transform:none}}
+.barre a{display:flex;align-items:center;justify-content:center;gap:8px;min-height:54px;border-radius:14px;text-decoration:none;font-weight:800;font-size:14.5px}
+.b-sec{background:var(--nuit-2);border:1px solid var(--filet);color:var(--blanc)}
+.b-sec .ico{color:var(--magenta-clair)}
+.b-pri{background:var(--magenta);color:var(--blanc);box-shadow:0 10px 26px -10px rgba(224,40,125,.8)}
+@media (max-width:360px){.barre a span{font-size:13px}.b-sec span{display:none}}
+
+/* --- Grand écran : carte à gauche, informations à droite --- */
+@media (min-width:900px){
+  .page{display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:start}
+  .hero{position:sticky;top:0;min-height:100svh}
+  .contenu{padding-block:56px;margin:0}
+  .barre{left:auto;right:max(24px,calc((100vw - 1080px) / 2 + 16px));bottom:24px;width:min(460px,42vw);border-radius:20px;border:1px solid var(--filet);padding:10px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
 """
 
 fonts = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=Michroma&display=swap">'
