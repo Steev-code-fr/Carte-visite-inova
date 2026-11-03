@@ -196,7 +196,7 @@ ICO = {
 def ico(n):
     return f'<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">{ICO[n]}</svg>'
 
-METIERS = [("feu", "Sécurité incendie"), ("cam", "Vidéosurveillance"), ("badge", "Contrôle d'accès"),
+METIERS = [("feu", "Sécurité incendie"), ("cam", "Vidéo\u00adsurveillance"), ("badge", "Contrôle d'accès"),
            ("bouclier", "Anti-intrusion"), ("interphone", "Interphonie")]
 site_txt = c['site'].replace('https://', '').replace('http://', '')
 metiers_recto = "".join(f'<span title="{h(m)}">{ico(i)}</span>' for i, m in METIERS)
@@ -255,9 +255,9 @@ page_body = f"""
   <div class="contenu">
     <ul class="coord">
       <li><a href="tel:{tel_uri(c['mobile'])}">{ico("tel")}<span><small>Mobile</small>{h(c['mobile'])}</span></a></li>
+      <li><a href="sms:{tel_uri(c['mobile'])}">{ico("sms")}<span><small>SMS</small>Écrire</span></a></li>
       {fixe_li}
       <li><a href="mailto:{h(c['email'])}">{ico("mail")}<span><small>E-mail</small>{h(c['email'])}</span></a></li>
-      <li><a href="sms:{tel_uri(c['mobile'])}">{ico("sms")}<span><small>SMS</small>Envoyer un message</span></a></li>
       <li><a href="{h(c['site'])}" target="_blank" rel="noopener">{ico("web")}<span><small>Site</small>{h(site_txt)}</span></a></li>
       <li><a href="{h(maps)}" target="_blank" rel="noopener">{ico("pin")}<span><small>Adresse</small>{h(a['rue'])}<br>{h(a['cp'])} {h(a['ville'])}</span></a></li>
       {linkedin_li}
@@ -440,18 +440,21 @@ a{color:inherit}
 .contenu{display:flex;flex-direction:column;gap:26px;max-width:520px;margin:0 auto;width:100%}
 .coord{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .coord li{min-width:0}
-.coord li:nth-child(2),.coord li:nth-child(5){grid-column:1/-1}
-.coord a{height:100%;display:flex;align-items:flex-start;gap:12px;padding:14px;border-radius:16px;background:var(--nuit-2);border:1px solid var(--filet);
+.coord li:nth-child(n+3){grid-column:1/-1}
+.coord a{height:100%;display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;background:var(--nuit-2);border:1px solid var(--filet);
   text-decoration:none;font-weight:700;font-size:14.5px;line-height:1.35;color:var(--blanc);transition:border-color .2s,background .2s,transform .2s}
 .coord a:hover,.coord a:focus-visible{border-color:var(--magenta);background:var(--nuit-3);transform:translateY(-2px)}
-.coord .ico{color:var(--magenta-clair);margin-top:2px}
+.coord .ico{color:var(--magenta-clair)}
 .coord span{min-width:0;overflow-wrap:anywhere;display:flex;flex-direction:column}
 .coord small{font:400 9.5px/1.6 var(--f-titre);letter-spacing:.14em;text-transform:uppercase;color:var(--lavande)}
 .metiers h2{display:flex;align-items:center;gap:12px;margin:0 0 14px;font:400 12px/1.4 var(--f-titre);letter-spacing:.2em;text-transform:uppercase;color:var(--blanc)}
 .metiers h2 .double{width:20px;height:12px}
 .metiers h2 .double::before,.metiers h2 .double::after{height:3px}
-.metiers ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:10px}
-.metiers li{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 8px;border-radius:16px;border:1px solid var(--filet);text-align:center;font-size:12.5px;font-weight:700;line-height:1.25}
+.metiers ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.metiers li{grid-column:span 2;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:112px;padding:14px 10px;
+  border-radius:16px;border:1px solid var(--filet);text-align:center;font-size:13px;font-weight:700;line-height:1.3;hyphens:manual;-webkit-hyphens:manual}
+.metiers li:nth-child(n+4){grid-column:span 3}
+.metiers li span{display:flex;align-items:center;justify-content:center;min-height:2.6em;max-width:100%;overflow-wrap:normal}
 .metiers li .ico{width:28px;height:28px;color:var(--magenta-clair)}
 .partager{display:flex;align-items:center;justify-content:center;gap:10px;padding:15px;border-radius:16px;width:100%;
   background:transparent;border:1px solid var(--magenta);color:var(--blanc);font:700 15px/1 var(--f-texte);cursor:pointer;transition:background .2s}
